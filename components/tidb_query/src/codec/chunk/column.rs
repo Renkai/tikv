@@ -6,9 +6,7 @@ use tipb::FieldType;
 
 use super::{Error, Result};
 use crate::codec::datum;
-use crate::codec::datum_codec::{
-    decode_date_time_from_uint, DatumChunkEncoder, DatumPayloadDecoder,
-};
+use crate::codec::datum_codec::{DatumChunkEncoder, DatumPayloadDecoder};
 use crate::codec::mysql::decimal::{DecimalPayloadDatumChunkEncoder, DECIMAL_STRUCT_SIZE};
 use crate::codec::mysql::time::TimePayloadDatumnChunkEncoder;
 use crate::codec::mysql::{
@@ -447,36 +445,11 @@ impl Column {
     #[inline]
     pub fn append_time_datum(
         &mut self,
-        mut raw_datum: &[u8],
+        raw_datum: &[u8],
         ctx: &mut EvalContext,
         field_type: &FieldType,
     ) -> Result<()> {
-        if raw_datum.is_empty() {
-            return Err(Error::InvalidDataType(
-                "Failed to decode datum flag".to_owned(),
-            ));
-        }
-        let flag = raw_datum[0];
-        raw_datum = &raw_datum[1..];
-        match flag {
-            datum::NIL_FLAG => self.append_null(),
-            // In index, it's flag is `UINT`. See TiDB's `encode()`.
-            datum::UINT_FLAG => {
-                let v = raw_datum.read_datum_payload_u64()?;
-                let v = decode_date_time_from_uint(v, ctx, field_type)?;
-                self.append_time(v)
-            }
-            // In record, it's flag is `VAR_UINT`. See TiDB's `flatten()` and `encode()`.
-            datum::VAR_UINT_FLAG => {
-                let v = raw_datum.read_datum_payload_var_u64()?;
-                let v = decode_date_time_from_uint(v, ctx, field_type)?;
-                self.append_time(v)
-            }
-            _ => Err(Error::InvalidDataType(format!(
-                "Unsupported datum flag {} for DateTime vector",
-                flag
-            ))),
-        }
+        self.write_time_to_chunk_by_datum(raw_datum, ctx, field_type)
     }
 
     /// Get the time datum of the row in the column.

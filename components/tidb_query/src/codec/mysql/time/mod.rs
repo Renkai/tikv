@@ -1684,7 +1684,7 @@ pub trait TimeEncoder: NumberEncoder {
     }
 }
 
-pub trait TimePayloadDatumnChunkEncoder: NumberEncoder {
+pub trait TimePayloadDatumnChunkEncoder: TimeEncoder {
     fn write_time_to_chunk_by_datum_payload(
         &mut self,
         mut src_payload: &[u8],
@@ -1701,6 +1701,7 @@ pub trait TimePayloadDatumnChunkEncoder: NumberEncoder {
         self.write_time(v)
     }
 }
+
 impl<T: BufferWriter> TimePayloadDatumnChunkEncoder for T {}
 
 pub trait TimeDecoder: NumberDecoder {

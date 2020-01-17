@@ -10,6 +10,7 @@ use crate::codec::datum_codec::{
     decode_date_time_from_uint, DatumChunkEncoder, DatumPayloadDecoder,
 };
 use crate::codec::mysql::decimal::{DecimalPayloadDatumChunkEncoder, DECIMAL_STRUCT_SIZE};
+use crate::codec::mysql::time::TimePayloadDatumnChunkEncoder;
 use crate::codec::mysql::{
     Decimal, DecimalDecoder, DecimalEncoder, Duration, DurationDecoder, DurationEncoder, Json,
     JsonDecoder, JsonEncoder, Time, TimeDecoder, TimeEncoder,
@@ -642,6 +643,41 @@ impl DatumChunkEncoder for Column {
             }
             _ => Err(Error::InvalidDataType(format!(
                 "Unsupported datum flag {} for Decimal vector",
+                flag
+            ))),
+        }
+    }
+
+    fn write_time_to_chunk_by_datum(
+        &mut self,
+        src_datum: &[u8],
+        ctx: &mut EvalContext,
+        field_type: &FieldType,
+    ) -> Result<()> {
+        if src_datum.is_empty() {
+            return Err(Error::InvalidDataType(
+                "Failed to decode datum flag".to_owned(),
+            ));
+        }
+        let flag = src_datum[0];
+        let raw_datum = &src_datum[1..];
+
+        match flag {
+            datum::NIL_FLAG => self.append_null(),
+            // In index, it's flag is `UINT`. See TiDB's `encode()`.
+            datum::UINT_FLAG => {
+                self.data
+                    .write_time_to_chunk_by_datum_payload(raw_datum, true, ctx, field_type)?;
+                self.finish_append_fixed()
+            }
+            // In record, it's flag is `VAR_UINT`. See TiDB's `flatten()` and `encode()`.
+            datum::VAR_UINT_FLAG => {
+                self.data
+                    .write_time_to_chunk_by_datum_payload(raw_datum, false, ctx, field_type)?;
+                self.finish_append_fixed()
+            }
+            _ => Err(Error::InvalidDataType(format!(
+                "Unsupported datum flag {} for DateTime vector",
                 flag
             ))),
         }

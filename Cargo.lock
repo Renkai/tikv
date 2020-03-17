@@ -201,10 +201,10 @@ dependencies = [
  "keys",
  "kvproto",
  "lazy_static",
- "prometheus",
+ "prometheus 0.8.0",
  "raft",
  "raftstore",
- "rand 0.7.2",
+ "rand 0.7.3",
  "serde",
  "serde_derive",
  "slog",
@@ -565,12 +565,14 @@ dependencies = [
  "libc",
  "log",
  "nix 0.11.1",
+ "opentelemetry",
+ "opentelemetry-jaeger",
  "pd_client",
- "prometheus",
+ "prometheus 0.8.0",
  "protobuf",
  "raft",
  "raftstore",
- "rand 0.7.2",
+ "rand 0.7.3",
  "serde_json",
  "signal",
  "slog",
@@ -578,6 +580,9 @@ dependencies = [
  "tikv",
  "tikv_util",
  "toml",
+ "tracing",
+ "tracing-opentelemetry",
+ "tracing-subscriber",
  "txn_types",
  "vlog",
  "yatp",
@@ -603,7 +608,7 @@ dependencies = [
  "libc",
  "panic_hook",
  "protobuf",
- "rand 0.7.2",
+ "rand 0.7.3",
  "static_assertions",
  "tikv_alloc",
 ]
@@ -644,7 +649,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c750ec12b83377637110d5a57f5ae08e895b06c4b16e2bdbf1a94ef717428c59"
 dependencies = [
  "proc-macro-hack",
- "rand 0.7.2",
+ "rand 0.7.3",
 ]
 
 [[package]]
@@ -965,7 +970,7 @@ dependencies = [
  "hex 0.3.2",
  "kvproto",
  "lazy_static",
- "prometheus",
+ "prometheus 0.8.0",
  "prost",
  "protobuf",
  "quick-error",
@@ -1000,8 +1005,8 @@ dependencies = [
  "engine_traits",
  "kvproto",
  "lazy_static",
- "prometheus",
- "rand 0.7.2",
+ "prometheus 0.8.0",
+ "rand 0.7.3",
  "rocksdb",
  "slog",
  "slog-global",
@@ -1055,7 +1060,7 @@ dependencies = [
  "futures-io",
  "futures-util",
  "kvproto",
- "rand 0.7.2",
+ "rand 0.7.3",
  "rusoto_core",
  "rusoto_credential",
  "rusoto_mock",
@@ -1734,6 +1739,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "integer-encoding"
+version = "1.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "083cfe51895f8d283aaf210a736fdf5d08a1171faa44fe08e979cc0c961b891a"
+
+[[package]]
 name = "into_other"
 version = "0.0.1"
 dependencies = [
@@ -2017,6 +2028,15 @@ dependencies = [
  "proc-macro2 1.0.9",
  "quote 1.0.3",
  "syn 1.0.5",
+]
+
+[[package]]
+name = "matchers"
+version = "0.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f099785f7595cc4b4553a174ce30dd7589ef93391ff414dbb67f62392b9e0ce1"
+dependencies = [
+ "regex-automata",
 ]
 
 [[package]]
@@ -2420,6 +2440,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "opentelemetry"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b0f23b371ce3a653bfeac9b2a64036f6d5f0edd34302f3115bb3790a2e408e40"
+dependencies = [
+ "lazy_static",
+ "pin-project",
+ "prometheus 0.7.0",
+ "rand 0.7.3",
+]
+
+[[package]]
+name = "opentelemetry-jaeger"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9bd192c86ceefc45c4f50fb9b71696ced11f5842e032a72ade6783df7549d925"
+dependencies = [
+ "opentelemetry",
+ "thrift",
+]
+
+[[package]]
 name = "ordered-float"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2507,7 +2549,7 @@ dependencies = [
  "kvproto",
  "lazy_static",
  "log",
- "prometheus",
+ "prometheus 0.8.0",
  "quick-error",
  "serde",
  "serde_derive",
@@ -2735,6 +2777,20 @@ dependencies = [
 
 [[package]]
 name = "prometheus"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5567486d5778e2c6455b1b90ff1c558f29e751fc018130fa182e15828e728af1"
+dependencies = [
+ "cfg-if",
+ "fnv",
+ "lazy_static",
+ "protobuf",
+ "quick-error",
+ "spin",
+]
+
+[[package]]
+name = "prometheus"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b0575e258dab62268e7236d7307caa38848acbda7ec7ab87bd9093791e999d20"
@@ -2889,7 +2945,7 @@ dependencies = [
  "protobuf",
  "quick-error",
  "raft-proto",
- "rand 0.7.2",
+ "rand 0.7.3",
  "slog",
 ]
 
@@ -2931,7 +2987,7 @@ dependencies = [
  "log_wrappers",
  "panic_hook",
  "pd_client",
- "prometheus",
+ "prometheus 0.8.0",
  "prost",
  "protobuf",
  "quick-error",
@@ -2976,9 +3032,9 @@ dependencies = [
 
 [[package]]
 name = "rand"
-version = "0.7.2"
+version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3ae1b169243eaf61759b8475a998f0a385e42042370f3a7dbaf35246eacc8412"
+checksum = "6a6b1679d49b24bbfe0c803429aa1874472f50d9b363131f0e89fc356b544d03"
 dependencies = [
  "getrandom",
  "libc",
@@ -3202,6 +3258,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "92b73c2a1770c255c240eaa4ee600df1704a38dc3feaa6e949e7fcd4f8dc09f9"
 dependencies = [
  "byteorder",
+ "regex-syntax",
+ "utf8-ranges",
 ]
 
 [[package]]
@@ -3582,6 +3640,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "sharded-slab"
+version = "0.0.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ae75d0445b5d3778c9da3d1f840faa16d0627c8607f78a74daf69e5b988c39a1"
+dependencies = [
+ "lazy_static",
+]
+
+[[package]]
 name = "shlex"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3730,7 +3797,7 @@ dependencies = [
  "keys",
  "kvproto",
  "lazy_static",
- "prometheus",
+ "prometheus 0.8.0",
  "quick-error",
  "serde",
  "serde_derive",
@@ -3926,7 +3993,7 @@ checksum = "7a6e24d9338a0a5be79593e2fa15a648add6138caa803e2d5bc782c371732ca9"
 dependencies = [
  "cfg-if",
  "libc",
- "rand 0.7.2",
+ "rand 0.7.3",
  "redox_syscall",
  "remove_dir_all",
  "winapi 0.3.8",
@@ -3982,7 +4049,7 @@ dependencies = [
  "pd_client",
  "raft",
  "raftstore",
- "rand 0.7.2",
+ "rand 0.7.3",
  "slog",
  "slog-global",
  "tempfile",
@@ -4126,6 +4193,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "threadpool"
+version = "1.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e2f0c90a5f3459330ac8bc0d2f879c693bb7a2f59689c1083fc4ef83834da865"
+dependencies = [
+ "num_cpus",
+]
+
+[[package]]
+name = "thrift"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0c6d965454947cc7266d22716ebfd07b18d84ebaf35eec558586bbb2a8cb6b5b"
+dependencies = [
+ "byteorder",
+ "integer-encoding",
+ "log",
+ "ordered-float",
+ "threadpool",
+]
+
+[[package]]
 name = "tidb_query"
 version = "0.0.1"
 dependencies = [
@@ -4155,7 +4244,7 @@ dependencies = [
  "ordered-float",
  "panic_hook",
  "profiler",
- "prometheus",
+ "prometheus 0.8.0",
  "prometheus-static-metric",
  "protobuf",
  "quick-error",
@@ -4251,7 +4340,7 @@ dependencies = [
  "pin-project",
  "pprof",
  "procinfo",
- "prometheus",
+ "prometheus 0.8.0",
  "prometheus-static-metric",
  "prost",
  "protobuf",
@@ -4333,10 +4422,10 @@ dependencies = [
  "openssl",
  "panic_hook",
  "procinfo",
- "prometheus",
+ "prometheus 0.8.0",
  "protobuf",
  "quick-error",
- "rand 0.7.2",
+ "rand 0.7.3",
  "regex",
  "serde",
  "serde_derive",
@@ -4718,6 +4807,89 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e987b6bf443f4b5b3b6f38704195592cca41c5bb7aedd3c3693c7081f8289860"
 
 [[package]]
+name = "tracing"
+version = "0.1.13"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1721cc8cf7d770cc4257872507180f35a4797272f5962f24c806af9e7faf52ab"
+dependencies = [
+ "cfg-if",
+ "tracing-attributes",
+ "tracing-core",
+]
+
+[[package]]
+name = "tracing-attributes"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7fbad39da2f9af1cae3016339ad7f2c7a9e870f12e8fd04c4fd7ef35b30c0d2b"
+dependencies = [
+ "quote 1.0.3",
+ "syn 1.0.5",
+]
+
+[[package]]
+name = "tracing-core"
+version = "0.1.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0aa83a9a47081cd522c09c81b31aec2c9273424976f922ad61c053b58350b715"
+dependencies = [
+ "lazy_static",
+]
+
+[[package]]
+name = "tracing-log"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5e0f8c7178e13481ff6765bd169b33e8d554c5d2bbede5e32c356194be02b9b9"
+dependencies = [
+ "lazy_static",
+ "log",
+ "tracing-core",
+]
+
+[[package]]
+name = "tracing-opentelemetry"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bc680d51c5ad60f6fa411178925155b75dbb8ea09eeb093e08ae706482d0ff5c"
+dependencies = [
+ "opentelemetry",
+ "rand 0.7.3",
+ "tracing-core",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "tracing-serde"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b6ccba2f8f16e0ed268fc765d9b7ff22e965e7185d32f8f1ec8294fe17d86e79"
+dependencies = [
+ "serde",
+ "tracing-core",
+]
+
+[[package]]
+name = "tracing-subscriber"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dedebcf5813b02261d6bab3a12c6a8ae702580c0405a2e8ec16c3713caf14c20"
+dependencies = [
+ "ansi_term",
+ "chrono",
+ "lazy_static",
+ "matchers",
+ "regex",
+ "serde",
+ "serde_json",
+ "sharded-slab",
+ "smallvec 1.1.0",
+ "tracing-core",
+ "tracing-log",
+ "tracing-serde",
+]
+
+[[package]]
 name = "try-lock"
 version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4824,6 +4996,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "utf8-ranges"
+version = "1.0.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b4ae116fef2b7fea257ed6440d3cfcff7f190865f170cdad00bb6465bf18ecba"
+
+[[package]]
 name = "utime"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4850,7 +5028,7 @@ version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9fde2f6a4bea1d6e007c4ad38c6839fa71cbb63b6dbf5b595aa38dc9b1093c11"
 dependencies = [
- "rand 0.7.2",
+ "rand 0.7.3",
 ]
 
 [[package]]
@@ -5115,8 +5293,8 @@ dependencies = [
  "lazy_static",
  "num_cpus",
  "parking_lot_core 0.7.0",
- "prometheus",
- "rand 0.7.2",
+ "prometheus 0.8.0",
+ "rand 0.7.3",
 ]
 
 [[package]]

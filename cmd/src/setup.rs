@@ -7,9 +7,12 @@ use std::sync::atomic::{AtomicBool, Ordering};
 
 use chrono::Local;
 use clap::ArgMatches;
+use opentelemetry::{api::Provider, global, sdk};
 use tikv::config::{check_critical_config, persist_config, MetricConfig, TiKvConfig};
 use tikv_util::collections::HashMap;
 use tikv_util::{self, logger};
+use tracing_opentelemetry::OpentelemetryLayer;
+use tracing_subscriber::{Layer, Registry};
 
 // A workaround for checking if log is initialized.
 pub static LOG_INITIALIZED: AtomicBool = AtomicBool::new(false);
@@ -107,6 +110,31 @@ pub fn initial_logger(config: &TiKvConfig) {
         };
     };
     LOG_INITIALIZED.store(true, Ordering::SeqCst);
+}
+
+pub fn initial_tracer(config: &TiKvConfig) {
+    let exporter = opentelemetry_jaeger::Exporter::builder()
+        .with_agent_endpoint(config.server.jaeger_addr.parse().unwrap())
+        .with_process(opentelemetry_jaeger::Process {
+            service_name: "tikv".to_string(),
+            tags: Vec::new(),
+        })
+        .init()
+        .unwrap();
+
+    let provider = sdk::Provider::builder()
+        .with_simple_exporter(exporter)
+        .with_config(sdk::Config {
+            default_sampler: Box::new(sdk::Sampler::Always),
+            ..Default::default()
+        })
+        .build();
+    global::set_provider(provider);
+
+    let tracer = global::trace_provider().get_tracer("tracing");
+    let opentelemetry = OpentelemetryLayer::with_tracer(tracer);
+    let subscriber = opentelemetry.with_subscriber(Registry::default());
+    tracing::subscriber::set_global_default(subscriber).unwrap();
 }
 
 #[allow(dead_code)]

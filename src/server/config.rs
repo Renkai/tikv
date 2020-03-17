@@ -14,6 +14,7 @@ pub use raftstore::store::Config as RaftStoreConfig;
 pub const DEFAULT_CLUSTER_ID: u64 = 0;
 pub const DEFAULT_LISTENING_ADDR: &str = "127.0.0.1:20160";
 const DEFAULT_ADVERTISE_LISTENING_ADDR: &str = "";
+const DEFAULT_JAEGER_ADDR: &str = "127.0.0.1:6831";
 const DEFAULT_STATUS_ADDR: &str = "127.0.0.1:20180";
 const DEFAULT_GRPC_CONCURRENCY: usize = 4;
 const DEFAULT_GRPC_CONCURRENT_STREAM: i32 = 1024;
@@ -56,6 +57,9 @@ pub struct Config {
     // Server advertise listening address for outer communication.
     // If not set, we will use listening address instead.
     pub advertise_addr: String,
+
+    // Jaeger port to send open-tracing spans
+    pub jaeger_addr: String,
 
     // These are related to TiKV status.
     pub status_addr: String,
@@ -119,6 +123,7 @@ impl Default for Config {
             addr: DEFAULT_LISTENING_ADDR.to_owned(),
             labels: HashMap::default(),
             advertise_addr: DEFAULT_ADVERTISE_LISTENING_ADDR.to_owned(),
+            jaeger_addr: DEFAULT_JAEGER_ADDR.to_owned(),
             status_addr: DEFAULT_STATUS_ADDR.to_owned(),
             status_thread_pool_size: 1,
             grpc_compression_type: GrpcCompressionType::None,

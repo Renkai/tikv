@@ -73,7 +73,7 @@ pub fn run_tikv(config: TiKvConfig) {
     // by PD and has to be provided when starting (or default
     // config will be use). Consider remove this constraint.
     initial_logger(&config);
-    
+
     initial_tracer(&config);
 
     // Print version information.

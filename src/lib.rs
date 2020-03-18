@@ -49,6 +49,8 @@ extern crate vlog;
 extern crate tikv_util;
 #[macro_use]
 extern crate failure;
+extern crate tracing;
+extern crate tracing_attributes;
 
 #[cfg(test)]
 extern crate test;

@@ -4373,6 +4373,8 @@ dependencies = [
  "tokio-threadpool",
  "tokio-timer",
  "toml",
+ "tracing",
+ "tracing-attributes",
  "txn_types",
  "url",
  "uuid 0.7.4",

@@ -18,6 +18,7 @@ use protobuf::Message;
 use tipb::{AnalyzeReq, AnalyzeType};
 use tipb::{ChecksumRequest, ChecksumScanOn};
 use tipb::{DagRequest, ExecType};
+use tracing_attributes::instrument;
 
 use crate::read_pool::ReadPoolHandle;
 use crate::server::Config;
@@ -31,6 +32,8 @@ use crate::coprocessor::interceptors::track;
 use crate::coprocessor::metrics::*;
 use crate::coprocessor::tracker::Tracker;
 use crate::coprocessor::*;
+use failure::_core::fmt::Formatter;
+use std::fmt::Debug;
 
 /// Requests that need time of less than `LIGHT_TASK_THRESHOLD` is considered as light ones,
 /// which means they don't need a permit from the semaphore before execution.
@@ -71,6 +74,12 @@ impl<E: Engine> Clone for Endpoint<E> {
 }
 
 impl<E: Engine> tikv_util::AssertSend for Endpoint<E> {}
+
+impl<E: Engine> Debug for Endpoint<E> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("coprocessor::Endpoint").finish()
+    }
+}
 
 impl<E: Engine> Endpoint<E> {
     pub fn new(cfg: &Config, read_pool: ReadPoolHandle) -> Self {
@@ -390,6 +399,7 @@ impl<E: Engine> Endpoint<E> {
     /// Parses and handles a unary request. Returns a future that will never fail. If there are
     /// errors during parsing or handling, they will be converted into a `Response` as the success
     /// result of the future.
+    #[instrument]
     #[inline]
     pub fn parse_and_handle_unary_request(
         &self,

@@ -16,7 +16,7 @@ use crate::Result;
 
 /// The interface for pull-based executors. It is similar to the Volcano Iterator model, but
 /// pulls data in batch and stores data by column.
-pub trait BatchExecutor: Send {
+pub trait BatchExecutor: Send {//TODO 糊next batch
     type StorageStats;
 
     /// Gets the schema of the output.

@@ -6,6 +6,7 @@ use protobuf::Message;
 use tidb_query::storage::scanner::{RangesScanner, RangesScannerOptions};
 use tidb_query::storage::Range;
 use tipb::{ChecksumAlgorithm, ChecksumRequest, ChecksumResponse};
+use tracing::{span, Level};
 
 use crate::coprocessor::dag::TiKVStorage;
 use crate::coprocessor::*;
@@ -49,6 +50,7 @@ impl<S: Snapshot> ChecksumContext<S> {
 #[async_trait]
 impl<S: Snapshot> RequestHandler for ChecksumContext<S> {
     async fn handle_request(&mut self) -> Result<Response> {
+        let _span = span!(Level::INFO, "ChecksumContext::handle_request");
         let algorithm = self.req.get_algorithm();
         if algorithm != ChecksumAlgorithm::Crc64Xor {
             return Err(box_err!("unknown checksum algorithm {:?}", algorithm));

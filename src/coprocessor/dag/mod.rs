@@ -9,6 +9,7 @@ use kvproto::coprocessor::{KeyRange, Response};
 use protobuf::Message;
 use tidb_query::storage::IntervalRange;
 use tipb::{DagRequest, SelectResponse, StreamResponse};
+use tracing::{span, Level};
 
 use crate::coprocessor::metrics::*;
 use crate::coprocessor::{Deadline, RequestHandler, Result};
@@ -120,6 +121,7 @@ impl DAGHandler {
 #[async_trait]
 impl RequestHandler for DAGHandler {
     async fn handle_request(&mut self) -> Result<Response> {
+        let _span = span!(Level::INFO, "DAGHandler::handle_request");
         handle_qe_response(self.runner.handle_request(), self.data_version)
     }
 
@@ -160,6 +162,7 @@ impl BatchDAGHandler {
 #[async_trait]
 impl RequestHandler for BatchDAGHandler {
     async fn handle_request(&mut self) -> Result<Response> {
+        let _span = span!(Level::INFO, "BatchDAGHandler::handle_request");
         handle_qe_response(self.runner.handle_request().await, self.data_version)
     }
 

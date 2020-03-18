@@ -11,6 +11,7 @@ use tidb_query::codec::datum;
 use tidb_query::executor::{Executor, IndexScanExecutor, ScanExecutor, TableScanExecutor};
 use tidb_query::expr::EvalContext;
 use tipb::{self, AnalyzeColumnsReq, AnalyzeIndexReq, AnalyzeReq, AnalyzeType, TableScan};
+use tracing::{span, Level};
 
 use super::cmsketch::CmSketch;
 use super::fmsketch::FmSketch;
@@ -103,6 +104,7 @@ impl<S: Snapshot> AnalyzeContext<S> {
 #[async_trait]
 impl<S: Snapshot> RequestHandler for AnalyzeContext<S> {
     async fn handle_request(&mut self) -> Result<Response> {
+        let _span = span!(Level::INFO, "AnalyzeContext::handle_request");
         let ret = match self.req.get_tp() {
             AnalyzeType::TypeIndex => {
                 let req = self.req.take_idx_req();

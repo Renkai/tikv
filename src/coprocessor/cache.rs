@@ -1,11 +1,11 @@
 // Copyright 2019 TiKV Project Authors. Licensed under Apache-2.0.
 
-use async_trait::async_trait;
-use kvproto::coprocessor::Response;
-
 use crate::coprocessor::RequestHandler;
 use crate::coprocessor::*;
 use crate::storage::Snapshot;
+use async_trait::async_trait;
+use kvproto::coprocessor::Response;
+use tracing::{span, Level};
 
 pub struct CachedRequestHandler {
     data_version: Option<u64>,
@@ -26,6 +26,7 @@ impl CachedRequestHandler {
 #[async_trait]
 impl RequestHandler for CachedRequestHandler {
     async fn handle_request(&mut self) -> Result<Response> {
+        let _span = span!(Level::INFO, "CachedRequestHandler::handle_request");
         let mut resp = Response::default();
         resp.set_is_cache_hit(true);
         if let Some(v) = self.data_version {

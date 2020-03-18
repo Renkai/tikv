@@ -18,7 +18,7 @@ use protobuf::Message;
 use tipb::{AnalyzeReq, AnalyzeType};
 use tipb::{ChecksumRequest, ChecksumScanOn};
 use tipb::{DagRequest, ExecType};
-use tracing_attributes::instrument;
+use tracing::{span, Level};
 
 use crate::read_pool::ReadPoolHandle;
 use crate::server::Config;
@@ -32,8 +32,6 @@ use crate::coprocessor::interceptors::track;
 use crate::coprocessor::metrics::*;
 use crate::coprocessor::tracker::Tracker;
 use crate::coprocessor::*;
-use failure::_core::fmt::Formatter;
-use std::fmt::Debug;
 
 /// Requests that need time of less than `LIGHT_TASK_THRESHOLD` is considered as light ones,
 /// which means they don't need a permit from the semaphore before execution.
@@ -74,12 +72,6 @@ impl<E: Engine> Clone for Endpoint<E> {
 }
 
 impl<E: Engine> tikv_util::AssertSend for Endpoint<E> {}
-
-impl<E: Engine> Debug for Endpoint<E> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("coprocessor::Endpoint").finish()
-    }
-}
 
 impl<E: Engine> Endpoint<E> {
     pub fn new(cfg: &Config, read_pool: ReadPoolHandle) -> Self {
@@ -320,6 +312,8 @@ impl<E: Engine> Endpoint<E> {
         mut tracker: Box<Tracker>,
         handler_builder: RequestHandlerBuilder<E::Snap>,
     ) -> Result<coppb::Response> {
+        let _span = span!(Level::INFO, "handle_unary_request_impl");
+
         // When this function is being executed, it may be queued for a long time, so that
         // deadline may exceed.
         tracker.req_ctx.deadline.check()?;
@@ -379,6 +373,7 @@ impl<E: Engine> Endpoint<E> {
         req_ctx: ReqContext,
         handler_builder: RequestHandlerBuilder<E::Snap>,
     ) -> impl Future<Item = coppb::Response, Error = Error> {
+        let _span = span!(Level::INFO, "handle_unary_request");
         let priority = req_ctx.context.get_priority();
         let task_id = req_ctx
             .txn_start_ts
@@ -399,13 +394,13 @@ impl<E: Engine> Endpoint<E> {
     /// Parses and handles a unary request. Returns a future that will never fail. If there are
     /// errors during parsing or handling, they will be converted into a `Response` as the success
     /// result of the future.
-    #[instrument]
     #[inline]
     pub fn parse_and_handle_unary_request(
         &self,
         req: coppb::Request,
         peer: Option<String>,
     ) -> impl Future<Item = coppb::Response, Error = ()> {
+        let _root_span = span!(Level::INFO, "parse_and_handle_unary_request");
         let result_of_future = self
             .parse_request(req, peer, false)
             .map(|(handler_builder, req_ctx)| self.handle_unary_request(req_ctx, handler_builder));
@@ -628,6 +623,7 @@ mod tests {
     #[async_trait]
     impl RequestHandler for UnaryFixture {
         async fn handle_request(&mut self) -> Result<coppb::Response> {
+            let _span = span!(Level::INFO, "UnaryFixture::handle_request");
             thread::sleep(Duration::from_millis(self.handle_duration_millis));
             self.result.take().unwrap()
         }
@@ -668,6 +664,7 @@ mod tests {
 
     impl RequestHandler for StreamFixture {
         fn handle_streaming_request(&mut self) -> Result<(Option<coppb::Response>, bool)> {
+            let _span = span!(Level::INFO, "StreamFixture::handle_request");
             let is_finished = if self.result_len == 0 {
                 true
             } else {
@@ -713,6 +710,7 @@ mod tests {
 
     impl RequestHandler for StreamFromClosure {
         fn handle_streaming_request(&mut self) -> Result<(Option<coppb::Response>, bool)> {
+            let _span = span!(Level::INFO, "StreamFromClosure::handle_request");
             let result = (self.result_generator)(self.nth);
             self.nth += 1;
             result

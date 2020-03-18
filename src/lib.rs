@@ -51,6 +51,7 @@ extern crate tikv_util;
 extern crate failure;
 extern crate tracing;
 extern crate tracing_attributes;
+extern crate tracing_futures;
 
 #[cfg(test)]
 extern crate test;

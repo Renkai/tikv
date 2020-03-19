@@ -92,6 +92,7 @@ impl<S: Storage> BatchExecutor for BatchIndexScanExecutor<S> {
 
     #[inline]
     fn next_batch(&mut self, scan_rows: usize) -> BatchExecuteResult {
+        let _span = span!(Level::INFO, "BatchIndexScanExecutor::next_batch");
         self.0.next_batch(scan_rows)
     }
 

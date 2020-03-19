@@ -170,6 +170,7 @@ impl<Src: BatchExecutor> BatchExecutor for BatchSelectionExecutor<Src> {
 
     #[inline]
     fn next_batch(&mut self, scan_rows: usize) -> BatchExecuteResult {
+        let _span = span!(Level::INFO, "BatchSelectionExecutor::next_batch");
         let mut src_result = self.src.next_batch(scan_rows);
 
         if let Err(e) = self.handle_src_result(&mut src_result) {

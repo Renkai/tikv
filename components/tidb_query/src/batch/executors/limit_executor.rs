@@ -32,6 +32,7 @@ impl<Src: BatchExecutor> BatchExecutor for BatchLimitExecutor<Src> {
 
     #[inline]
     fn next_batch(&mut self, scan_rows: usize) -> BatchExecuteResult {
+        let _span = span!(Level::INFO, "BatchLimitExecutor::next_batch");
         let mut result = self.src.next_batch(scan_rows);
         if result.logical_rows.len() < self.remaining_rows {
             self.remaining_rows -= result.logical_rows.len();

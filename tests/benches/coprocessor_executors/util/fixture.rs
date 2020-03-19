@@ -337,6 +337,7 @@ impl BatchExecutor for BatchFixtureExecutor {
 
     #[inline]
     fn next_batch(&mut self, scan_rows: usize) -> BatchExecuteResult {
+        let _span = span!(Level::INFO, "BatchFixtureExecutor::next_batch");
         let mut columns = Vec::with_capacity(self.columns.len());
         for col in &mut self.columns {
             let mut column = LazyBatchColumn::raw_with_capacity(scan_rows);

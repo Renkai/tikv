@@ -33,6 +33,7 @@ impl<Src: BatchExecutor> BatchExecutor for BatchStreamAggregationExecutor<Src> {
 
     #[inline]
     fn next_batch(&mut self, scan_rows: usize) -> BatchExecuteResult {
+        let _span = span!(Level::INFO, "BatchStreamAggregationExecutor::next_batch");
         self.0.next_batch(scan_rows)
     }
 

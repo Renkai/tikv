@@ -290,6 +290,7 @@ impl<Src: BatchExecutor> BatchExecutor for BatchTopNExecutor<Src> {
 
     #[inline]
     fn next_batch(&mut self, _scan_rows: usize) -> BatchExecuteResult {
+        let _span = span!(Level::INFO, "BatchTopNExecutor::next_batch");
         assert!(!self.is_ended);
 
         if self.n == 0 {

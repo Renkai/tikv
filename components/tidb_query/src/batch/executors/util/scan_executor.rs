@@ -161,6 +161,7 @@ impl<S: Storage, I: ScanExecutorImpl> BatchExecutor for ScanExecutor<S, I> {
 
     #[inline]
     fn next_batch(&mut self, scan_rows: usize) -> BatchExecuteResult {
+        let _span = span!(Level::INFO, "ScanExecutor::next_batch");
         assert!(!self.is_ended);
         assert!(scan_rows > 0);
 

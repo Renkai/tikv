@@ -96,6 +96,7 @@ impl<C: ExecSummaryCollector + Send, T: BatchExecutor> BatchExecutor
     }
 
     fn next_batch(&mut self, scan_rows: usize) -> BatchExecuteResult {
+        let _span = span!(Level::INFO, "BatchExecutor::next_batch");
         let timer = self.summary_collector.on_start_iterate();
         let result = self.inner.next_batch(scan_rows);
         self.summary_collector

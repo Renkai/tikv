@@ -280,6 +280,7 @@ impl<Src: BatchExecutor, I: AggregationExecutorImpl<Src>> BatchExecutor
 
     #[inline]
     fn next_batch(&mut self, _scan_rows: usize) -> BatchExecuteResult {
+        let _span = span!(Level::INFO, "AggregationExecutor::next_batch");
         assert!(!self.is_ended);
 
         let result = self.handle_next_batch();

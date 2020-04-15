@@ -9,12 +9,6 @@ use std::path::Path;
 use std::str::FromStr;
 use std::sync::Arc;
 
-use self::engine_metrics::{
-    ROCKSDB_COMPRESSION_RATIO_AT_LEVEL, ROCKSDB_CUR_SIZE_ALL_MEM_TABLES,
-    ROCKSDB_NUM_FILES_AT_LEVEL, ROCKSDB_NUM_IMMUTABLE_MEM_TABLE,
-    ROCKSDB_TITANDB_LIVE_BLOB_FILE_SIZE, ROCKSDB_TITANDB_OBSOLETE_BLOB_FILE_SIZE,
-    ROCKSDB_TOTAL_SST_FILES_SIZE,
-};
 use crate::{Error, Result};
 use rocksdb::load_latest_options;
 use rocksdb::rocksdb::supported_compression;
@@ -23,6 +17,7 @@ use rocksdb::{
     SliceTransform, DB,
 };
 
+use self::engine_metrics::ROCKSDB_COMPRESSION_RATIO_AT_LEVEL;
 pub use crate::rocks::CFHandle;
 use engine_traits::CF_DEFAULT;
 
@@ -238,28 +233,6 @@ pub fn db_exist(path: &str) -> bool {
     fs::read_dir(&path).unwrap().next().is_some()
 }
 
-pub(crate) fn get_engine_cf_used_size(engine: &DB, handle: &CFHandle) -> u64 {
-    let mut cf_used_size = engine
-        .get_property_int_cf(handle, ROCKSDB_TOTAL_SST_FILES_SIZE)
-        .expect("rocksdb is too old, missing total-sst-files-size property");
-    // For memtable
-    if let Some(mem_table) = engine.get_property_int_cf(handle, ROCKSDB_CUR_SIZE_ALL_MEM_TABLES) {
-        cf_used_size += mem_table;
-    }
-    // For blob files
-    if let Some(live_blob) = engine.get_property_int_cf(handle, ROCKSDB_TITANDB_LIVE_BLOB_FILE_SIZE)
-    {
-        cf_used_size += live_blob;
-    }
-    if let Some(obsolete_blob) =
-        engine.get_property_int_cf(handle, ROCKSDB_TITANDB_OBSOLETE_BLOB_FILE_SIZE)
-    {
-        cf_used_size += obsolete_blob;
-    }
-
-    cf_used_size
-}
-
 /// Gets engine's compression ratio at given level.
 pub fn get_engine_compression_ratio_at_level(
     engine: &DB,
@@ -276,17 +249,6 @@ pub fn get_engine_compression_ratio_at_level(
         }
     }
     None
-}
-
-/// Gets the number of files at given level of given column family.
-pub fn get_cf_num_files_at_level(engine: &DB, handle: &CFHandle, level: usize) -> Option<u64> {
-    let prop = format!("{}{}", ROCKSDB_NUM_FILES_AT_LEVEL, level);
-    engine.get_property_int_cf(handle, &prop)
-}
-
-/// Gets the number of immutable mem-table of given column family.
-pub fn get_num_immutable_mem_table(engine: &DB, handle: &CFHandle) -> Option<u64> {
-    engine.get_property_int_cf(handle, ROCKSDB_NUM_IMMUTABLE_MEM_TABLE)
 }
 
 pub struct FixedSuffixSliceTransform {
